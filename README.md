@@ -26,17 +26,25 @@
 
 ### Docker 运行
 
+`docker-compose.yml` 使用 `build: .` 从本地源码构建镜像（不再拉取远程预构建镜像），首次启动或更新源码后需要带 `--build`：
+
 ```bash
-git clone git@github.com:basketikun/chatgpt2api.git
+git clone git@github.com:hymhub/chatgpt2api.git
 cd chatgpt2api
-docker compose up -d
+docker compose up -d --build
 ```
 
 启动前请先在 `config.json` 中设置 `auth-key`，也可以在 `docker-compose.yml` 中通过 `CHATGPT2API_AUTH_KEY` 覆盖。
 
-- Web 面板：`http://localhost:3000`
-- API 地址：`http://localhost:3000/v1`
+- Web 面板：`http://localhost:3001`
+- API 地址：`http://localhost:3001/v1`
 - 数据目录：`./data`
+
+验证容器内运行的是当前源码：
+
+```bash
+docker compose exec app grep -n "复用注册 session" /app/services/register/openai_register.py
+```
 
 ### 本地开发
 
@@ -60,10 +68,14 @@ bun run dev
 后续更新新版本：
 
 ```bash
-docker pull ghcr.io/basketikun/chatgpt2api:latest
-docker-compose down
-docker-compose up -d
+git pull
+docker compose up -d --build
+```
 
+如果怀疑构建缓存导致代码未更新，强制全量重建：
+
+```bash
+docker compose build --no-cache && docker compose up -d
 ```
 
 ### 存储后端配置
